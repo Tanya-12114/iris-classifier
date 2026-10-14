@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 
@@ -43,7 +42,7 @@ def load_and_train_model():
 
     # Train-test split & Model training
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-    model = RandomForestClassifier()
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X_train, y_train)
     
     accuracy = model.score(X_test, y_test)
@@ -63,18 +62,20 @@ if model is not None:
     petal_width  = st.slider("Petal Width (cm)",  float(X.iloc[:,3].min()), float(X.iloc[:,3].max()), float(X.iloc[:,3].mean()))
 
     if st.button("Predict"):
-        input_features = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
+        input_features = pd.DataFrame(
+            [[sepal_length, sepal_width, petal_length, petal_width]], columns=X.columns
+        )
         prediction = model.predict(input_features)[0]
         st.success(f"The predicted Iris species is: **{prediction}**")
 
+        # Images from Wikimedia Commons (via the stable Special:FilePath redirect)
+        commons = "https://commons.wikimedia.org/wiki/Special:FilePath/"
         flower_images = {
-            'Iris-setosa': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxHVVjSM5dIobxwIfyjAmjkS_tWc4ssD6yCQ&s',
-            'Iris-versicolor': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Iris_versicolor_3.jpg',
-            'Iris-virginica': 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Iris_virginica.jpg',
-            'setosa': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxHVVjSM5dIobxwIfyjAmjkS_tWc4ssD6yCQ&s',
-            'versicolor': 'https://upload.wikimedia.org/wikipedia/commons/4/41/Iris_versicolor_3.jpg',
-            'virginica': 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Iris_virginica.jpg'
+            "setosa": commons + "Kosaciec_szczecinkowaty_Iris_setosa.jpg",
+            "versicolor": commons + "Iris_versicolor_3.jpg",
+            "virginica": commons + "Iris_virginica.jpg",
         }
+        species_key = str(prediction).lower().replace("iris-", "")
 
-        if prediction in flower_images:
-            st.image(flower_images[prediction], caption=f"{str(prediction).capitalize()}", use_container_width=True)
+        if species_key in flower_images:
+            st.image(flower_images[species_key], caption=species_key.capitalize(), width="stretch")
