@@ -1,0 +1,6 @@
+# Full local environment (notebook, Gradio app, MLflow UI)
+-r requirements-ci.txt
+gradio
+matplotlib
+seaborn
+jupyter

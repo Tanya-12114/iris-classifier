@@ -15,7 +15,10 @@ It includes an exploratory notebook, an MLflow-tracked training script, and two 
 | `streamlit_app.py` | Streamlit app that trains a Random Forest from `Iris.csv` on startup and predicts species |
 | `model.pkl` | Latest Random Forest saved by `train.py` (joblib format) |
 | `mlflow.db`, `mlruns/` | MLflow tracking database and model artifacts (created by `train.py`, git-ignored) |
-| `requirements.txt` | Pinned Python dependencies |
+| `requirements*.txt` | Dependencies: app (`requirements.txt`), CI (`-ci`), full local (`-dev`) |
+| `tests/` | pytest unit, integration and Streamlit app tests |
+| `Jenkinsfile` | Jenkins CI pipeline: checkout, install, test, train, archive, deploy check |
+| `jenkins/Dockerfile`, `docker-compose.yml` | Local Jenkins with Python installed |
 | `.gitignore` | Keeps MLflow data, virtual envs and caches out of git |
 
 ## Getting started
@@ -25,8 +28,10 @@ It includes an exploratory notebook, an MLflow-tracked training script, and two 
 ```bash
 python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 ```
+
+`requirements.txt` holds only what the deployed Streamlit app needs; `requirements-ci.txt` is used by Jenkins; `requirements-dev.txt` is the full local setup.
 
 ### 2. Train the model (MLflow)
 
@@ -83,3 +88,11 @@ Python · scikit-learn · pandas · NumPy · MLflow · Gradio · Streamlit
 ## Dataset
 
 Fisher's Iris dataset (UCI Machine Learning Repository).
+
+## Tests and CI
+
+```bash
+pytest
+```
+
+The `Jenkinsfile` runs the same tests on every push, then runs `train.py` and archives `model.pkl`. See `JENKINS_SETUP.md` for setting up Jenkins.

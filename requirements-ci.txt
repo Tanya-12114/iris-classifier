@@ -1,0 +1,6 @@
+# Used by the Jenkins pipeline: app dependencies + MLflow + test tools
+-r requirements.txt
+mlflow
+joblib
+skops
+pytest
