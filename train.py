@@ -1,4 +1,6 @@
 """Train a Random Forest on the Iris dataset and log it to MLflow."""
+import argparse
+
 import joblib
 import mlflow
 import mlflow.sklearn
@@ -10,9 +12,15 @@ from sklearn.model_selection import train_test_split
 TRACKING_URI = "sqlite:///mlflow.db"
 EXPERIMENT_NAME = "Iris_Classification_Experiment"
 MODEL_ARTIFACT_NAME = "iris_rf_model"
+REGISTERED_MODEL_NAME = "Iris_RF_Classifier"
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--n_estimators", type=int, default=100)
+    parser.add_argument("--max_depth", type=int, default=3)
+    args = parser.parse_args()
+
     mlflow.set_tracking_uri(TRACKING_URI)
     mlflow.set_experiment(EXPERIMENT_NAME)
 
@@ -21,8 +29,8 @@ def main():
         iris.data, iris.target, test_size=0.2, random_state=42
     )
 
-    n_estimators = 100
-    max_depth = 3
+    n_estimators = args.n_estimators
+    max_depth = args.max_depth
 
     with mlflow.start_run() as run:
         model = RandomForestClassifier(
@@ -38,6 +46,7 @@ def main():
         mlflow.sklearn.log_model(
             model,
             name=MODEL_ARTIFACT_NAME,
+            registered_model_name=REGISTERED_MODEL_NAME,
             skops_trusted_types=["sklearn.tree._tree.Tree"],
         )
 
