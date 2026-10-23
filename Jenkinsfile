@@ -69,7 +69,14 @@ pipeline {
                 echo 'Streamlit Community Cloud redeploys automatically when main is pushed to GitHub.'
                 // Smoke test of the live app; a failure marks the build UNSTABLE, not FAILED
                 catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-                    sh 'curl -fsSL --max-time 60 -o /dev/null -w "Live app HTTP status: %{http_code}\\n" "${APP_URL}"'
+                    sh '''
+    STATUS=$(curl -s -o /dev/null --max-time 60 -w "%{http_code}" "${APP_URL}")
+    echo "Live app HTTP status: ${STATUS}"
+    case "${STATUS}" in
+        2*|3*) echo "App is reachable" ;;
+        *) echo "App is not reachable"; exit 1 ;;
+    esac
+'''
                 }
             }
         }
